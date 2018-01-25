@@ -6,17 +6,18 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"encoding/json"
 	"io/ioutil"
+	"aterr"
 )
 
 func main() {
-	config,err:= ReadDbConfig("/Users/yh/AndroidStudioProjects/GoWeb/config/dbConfig.json")
+	config,err:= ReadDbConfig("/Users/yh/AndroidStudioProjects/GoWeb/config/logDBConfig.json")
 	if err != nil {
 		fmt.Println("..............ttttt")
 		return
 	}
 
 	db, err := sql.Open("mysql", config.Name+":"+config.Pwd+"@tcp("+config.Ip+")/"+config.DbName+"?charset=utf8")
-	checkErr(err)
+	aterr.CheckErr(err)
 
 	insertData(db)
 
@@ -39,13 +40,14 @@ func main() {
 }
 func insertData(db *sql.DB) {
 		//插入数据
-		stmt, err := db.Prepare("INSERT INTO userinfo(username,departname,created) VALUES(?,?,?)")
-		checkErr(err)
+		stmt, err := db.Prepare(`INSERT INTO ProblemInfo(problem,contactInfo,time) VALUES(?,?,?)`)
+	aterr.CheckErr(err)
+
 
 		res, err := stmt.Exec("HOUXIAOYUN", "TEST", "2017-06-24")
-		checkErr(err)
+	aterr.CheckErr(err)
 		id, err := res.LastInsertId()
-		checkErr(err)
+	aterr.CheckErr(err)
 		fmt.Println(id)
 }
 func updateData(db *sql.DB, id int) {
@@ -53,11 +55,11 @@ func updateData(db *sql.DB, id int) {
 
 		//更新数据
 		stmt, err := db.Prepare("update userinfo set username=? where uid=?")
-		checkErr(err)
+	aterr.CheckErr(err)
 		res, err := stmt.Exec("yanghaiUpdate", 23)
-		checkErr(err)
+	aterr.CheckErr(err)
 		affect, err := res.RowsAffected()
-		checkErr(err)
+	aterr.CheckErr(err)
 	fmt.Println(affect)
 }
 
@@ -66,14 +68,14 @@ func queryData(db *sql.DB) {
 	//查询数据
 	rows, err := db.Query("SELECT * FROM userinfo")
 	data := []UserInfo{}
-	checkErr(err)
+	aterr.CheckErr(err)
 	for rows.Next() {
 		var uid int
 		var username string
 		var department string
 		var created string
 		err = rows.Scan(&uid, &username, &department, &created)
-		checkErr(err)
+		aterr.CheckErr(err)
 		ui := UserInfo{username,department,created}
 		data = append(data,ui)
 		fmt.Println(uid, username, department, created)
@@ -87,7 +89,7 @@ type UserInfo struct {
 	DepartName string
 	Created string
 }
-func checkErr(err error) {
+func CheckErr(err error) {
 	fmt.Println(err)
 	if err != nil {
 		panic(err)
@@ -97,12 +99,12 @@ func checkErr(err error) {
 /**
 	读取数据库的配置文件
  */
-func ReadDbConfig(path string) (*dbConfig,error) {
+func ReadDbConfig(path string) (*DbConfig,error) {
 	res,err := ioutil.ReadFile(path)
 	if err!= nil {
 		return nil,err
 	}
-	var config dbConfig
+	var config DbConfig
 
 	err = json.Unmarshal(res,&config)
 	if err != nil {
@@ -110,7 +112,7 @@ func ReadDbConfig(path string) (*dbConfig,error) {
 	}
 	return &config,nil
 }
-type dbConfig struct{
+type DbConfig struct{
 	Name string
 	Pwd string
 	Ip string
