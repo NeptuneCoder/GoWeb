@@ -5,24 +5,24 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"encoding/json"
-	"io/ioutil"
 	"aterr"
+	"atdb"
 )
 
 func main() {
-	config,err:= ReadDbConfig("/Users/yh/AndroidStudioProjects/GoWeb/config/logDBConfig.json")
+	config,err:= atdb.ReadDbConfig("/Users/yh/AndroidStudioProjects/GoWeb/config/logDBConfig.json")
 	if err != nil {
 		fmt.Println("..............ttttt")
 		return
 	}
 
-	db, err := sql.Open("mysql", config.Name+":"+config.Pwd+"@tcp("+config.Ip+")/"+config.DbName+"?charset=utf8")
+	db, err := atdb.InitMysql(*config)
 	aterr.CheckErr(err)
 
 	insertData(db)
 
 	//
-	//queryData(db)
+	queryData(db)
 	//////删除数据
 	//stmt, err := db.Prepare("delete from userinfo where uid=?")
 	//checkErr(err)
@@ -96,22 +96,7 @@ func CheckErr(err error) {
 	}
 }
 
-/**
-	读取数据库的配置文件
- */
-func ReadDbConfig(path string) (*DbConfig,error) {
-	res,err := ioutil.ReadFile(path)
-	if err!= nil {
-		return nil,err
-	}
-	var config DbConfig
 
-	err = json.Unmarshal(res,&config)
-	if err != nil {
-		return nil,err
-	}
-	return &config,nil
-}
 type DbConfig struct{
 	Name string
 	Pwd string
