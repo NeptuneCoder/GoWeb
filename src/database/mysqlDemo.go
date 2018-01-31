@@ -5,8 +5,8 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"encoding/json"
-	"aterr"
-	"atdb"
+	"github.com/yanghai23/GoLib/atdb"
+	"github.com/yanghai23/GoLib/aterr"
 )
 
 func main() {
